@@ -1,6 +1,8 @@
-# Engage - URL to PDF Converter
-
-A beautiful, lightweight web application that converts URLs and raw HTML to customizable, publication-quality PDFs with client-side generation and optional AI-powered content cleanup.
+<div align="center">
+  <img src="docs/images/logo.svg" alt="Engage Logo" width="300">
+  <h1>Engage - URL to PDF Converter</h1>
+  <p>A beautiful, lightweight web application that converts URLs and raw HTML to customizable, publication-quality PDFs with client-side generation and optional AI-powered content cleanup.</p>
+</div>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build and Publish](https://github.com/nilayk/engage/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/nilayk/engage/actions/workflows/docker-publish.yml)
@@ -43,6 +45,17 @@ Integrated [Ollama](https://ollama.ai/) for intelligent content processing:
 - Uses `qwen2.5-coder` to clean up formatting
 - Fixes heading hierarchy
 - Removes remaining non-content elements
+
+---
+
+## Screenshots
+
+<div align="center">
+  
+  <img src="docs/images/screenshot-main.png" alt="Main Interface" width="800">
+  <p><em>Main interface with URL input and PDF customization options</em></p>
+  
+</div>
 
 ---
 
