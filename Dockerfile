@@ -23,7 +23,7 @@ RUN npm install --production --no-audit --no-fund && \
     npm cache clean --force
 
 # Copy application files (as nodejs user for correct ownership)
-COPY --chown=nodejs:nodejs server.js ./
+COPY --chown=nodejs:nodejs src ./src
 COPY --chown=nodejs:nodejs public ./public
 
 # Set environment defaults
@@ -41,4 +41,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 USER nodejs
 
 # Start server
-CMD ["node", "server.js"]
+CMD ["node", "src/index.js"]

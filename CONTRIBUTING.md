@@ -91,17 +91,24 @@ npm start
 
 ```
 engage/
-├── server.js              # Express server
-├── public/
-│   ├── index.html         # Main HTML
-│   ├── css/styles.css     # Styling
+├── src/                       # Backend source code
+│   ├── index.js               # Express app entry point
+│   ├── config.js              # Environment configuration
+│   ├── routes/
+│   │   ├── fetch.js           # /api/fetch endpoint
+│   │   └── ollama.js          # /api/ollama/* endpoints
+│   └── utils/
+│       └── http-client.js     # Shared HTTP utilities
+├── public/                    # Frontend static files
+│   ├── index.html             # Main HTML
+│   ├── css/styles.css         # Styling
 │   └── js/
-│       ├── app.js         # Main application logic
-│       └── pdf-engine.js  # PDF generation
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Full setup (with AI)
-├── docker-compose.lite.yml # Lite setup (no AI)
-├── .env.example           # Environment configuration template
+│       ├── app.js             # Main application logic
+│       └── pdf-engine.js      # PDF generation
+├── Dockerfile                 # Docker configuration
+├── docker-compose.yml         # Full setup (with AI)
+├── docker-compose.lite.yml    # Lite setup (no AI)
+├── .env.example               # Environment configuration template
 └── .github/
     └── workflows/
         └── docker-publish.yml # CI/CD pipeline
