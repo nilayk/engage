@@ -8,19 +8,23 @@ LABEL org.opencontainers.image.description="URL to PDF Converter with AI-powered
 LABEL org.opencontainers.image.source="https://github.com/engage"
 LABEL org.opencontainers.image.licenses="MIT"
 
+# Create non-root user first (before copying files)
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
 # Set working directory
 WORKDIR /app
 
-# Copy package files first (for better layer caching)
-COPY package.json ./
+# Copy package files (as nodejs user for correct ownership)
+COPY --chown=nodejs:nodejs package.json ./
 
 # Install production dependencies only
 RUN npm install --production --no-audit --no-fund && \
     npm cache clean --force
 
-# Copy application files
-COPY server.js ./
-COPY public ./public
+# Copy application files (as nodejs user for correct ownership)
+COPY --chown=nodejs:nodejs server.js ./
+COPY --chown=nodejs:nodejs public ./public
 
 # Set environment defaults
 ENV NODE_ENV=production
@@ -33,9 +37,7 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Run as non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# Switch to non-root user
 USER nodejs
 
 # Start server
