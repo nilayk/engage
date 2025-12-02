@@ -1,0 +1,22 @@
+version: '3.8'
+
+# Lite version - Engage only, without Ollama AI
+# Use this if you don't need AI cleanup features
+
+services:
+  engage:
+    build: .
+    container_name: engage
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+

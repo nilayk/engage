@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engage - URL to PDF Converter</title>
+    <meta name="description" content="Convert any URL or HTML to a beautiful, customizable PDF document">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Literata:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="title-icon">⚡</span>
+                <span class="title-text">Engage</span>
+            </h1>
+            <p class="subtitle">Transform any <span class="highlight">URL</span> or <span class="highlight">HTML</span> into beautiful PDFs</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Options Panel -->
+            <aside class="options-panel">
+                <div class="panel-section">
+                    <h2 class="section-title">Input Source</h2>
+                    <div class="input-mode-toggle">
+                        <button class="mode-btn active" data-mode="url"><span>URL</span></button>
+                        <button class="mode-btn" data-mode="html"><span>Raw HTML</span></button>
+                    </div>
+                    
+                    <div id="url-input-container" class="input-container">
+                        <input 
+                            type="url" 
+                            id="url-input" 
+                            class="input-field" 
+                            placeholder="https://example.com/article"
+                            autocomplete="url"
+                        >
+                        <button id="fetch-btn" class="btn btn-primary">
+                            <span class="btn-icon">🔗</span>
+                            Fetch Page
+                        </button>
+                    </div>
+                    
+                    <div id="html-input-container" class="input-container" style="display: none;">
+                        <textarea 
+                            id="html-input" 
+                            class="input-field textarea" 
+                            placeholder="<html>&#10;  <body>&#10;    <h1>Your content here...</h1>&#10;  </body>&#10;</html>"
+                            rows="8"
+                            spellcheck="false"
+                        ></textarea>
+                        <button id="load-html-btn" class="btn btn-primary">
+                            <span class="btn-icon">📝</span>
+                            Load HTML
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">PDF Settings</h2>
+                    
+                    <div class="option-group">
+                        <label class="option-label">Page Size</label>
+                        <select id="page-size" class="select-field">
+                            <option value="a4">A4 (210 × 297 mm)</option>
+                            <option value="letter">Letter (8.5 × 11 in)</option>
+                            <option value="legal">Legal (8.5 × 14 in)</option>
+                            <option value="tabloid">Tabloid (11 × 17 in)</option>
+                            <option value="kindle">Kindle / E-Reader (90 × 122 mm)</option>
+                            <option value="smartphone">Smartphone (90 × 160 mm)</option>
+                            <option value="smartphone-wide">Smartphone Wide (100 × 140 mm)</option>
+                            <option value="custom">Custom Dimensions</option>
+                        </select>
+                    </div>
+
+                    <div id="custom-size-container" class="option-group" style="display: none;">
+                        <label class="option-label">Custom Size (mm)</label>
+                        <div class="dimension-inputs">
+                            <input type="number" id="custom-width" class="input-field small" placeholder="W" value="210" min="50" max="1000">
+                            <span>×</span>
+                            <input type="number" id="custom-height" class="input-field small" placeholder="H" value="297" min="50" max="1000">
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">Margins (mm)</label>
+                        <div class="margin-inputs">
+                            <input type="number" id="margin-top" class="input-field tiny" placeholder="Top" value="10" min="0" max="100">
+                            <input type="number" id="margin-right" class="input-field tiny" placeholder="Right" value="10" min="0" max="100">
+                            <input type="number" id="margin-bottom" class="input-field tiny" placeholder="Bottom" value="10" min="0" max="100">
+                            <input type="number" id="margin-left" class="input-field tiny" placeholder="Left" value="10" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">Font Scale</label>
+                        <div class="slider-container">
+                            <input type="range" id="font-scale" class="slider" min="0.5" max="2" step="0.1" value="1">
+                            <span class="slider-value" id="font-scale-value">1.0x</span>
+                        </div>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">
+                            Include Background
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="include-background" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">
+                            Syntax Highlighting
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="syntax-highlight" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="option-label">
+                            Strip Navigation
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="strip-chrome" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2 class="section-title">Book Mode</h2>
+                    
+                    <div class="option-group">
+                        <label class="option-label">
+                            Enable Book Styling
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="book-mode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+
+                    <div id="book-options" class="book-options" style="display: none;">
+                        <div class="option-group">
+                            <label class="option-label">
+                                Generate Table of Contents
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="generate-toc" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label class="option-label">
+                                Drop Caps
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="drop-caps" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label class="option-label">
+                                Chapter Headers
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="chapter-headers" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </label>
+                        </div>
+
+                        <div class="option-group">
+                            <label class="option-label">Book Font</label>
+                            <select id="book-font" class="select-field">
+                                <option value="serif">Classic Serif (Georgia)</option>
+                                <option value="modern">Modern Serif (Merriweather)</option>
+                                <option value="elegant">Elegant (Libre Baskerville)</option>
+                                <option value="readable">High Readability (Literata)</option>
+                            </select>
+                        </div>
+
+<div class="option-group">
+                        <label class="option-label">
+                            Smart Extraction
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="smart-extract">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <p class="option-hint" id="extract-hint" style="display: none;">Uses embeddings to find main content</p>
+
+                    <div class="option-group">
+                        <label class="option-label">
+                            AI Cleanup (Ollama)
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="ai-cleanup">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                    <p class="option-hint" id="ai-hint" style="display: none;">Cleans up formatting with LLM</p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <button id="generate-pdf-btn" class="btn btn-primary btn-large" disabled>
+                        <span class="btn-icon">📄</span>
+                        Generate PDF
+                    </button>
+                    <button id="print-pdf-btn" class="btn btn-secondary btn-large" disabled style="margin-top: 0.5rem;">
+                        <span class="btn-icon">🖨️</span>
+                        Print to PDF
+                    </button>
+                    <p class="btn-hint">Use "Print to PDF" for very long documents</p>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div id="loading-indicator" class="loading-indicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Fetching content...</p>
+                </div>
+
+                <div id="error-message" class="error-message" style="display: none;"></div>
+
+                <div id="preview-container" class="preview-container" style="display: none;">
+                    <div class="preview-header">
+                        <span class="preview-title">Preview Ready</span>
+                    </div>
+                    <div id="content-preview" class="content-preview"></div>
+                </div>
+
+                <div id="empty-state" class="empty-state">
+                    <div class="empty-illustration">
+                        <div class="empty-icon">📄</div>
+                    </div>
+                    <h3>Ready to Convert</h3>
+                    <p>Enter a URL or paste HTML to transform your content into a PDF</p>
+                    <div class="empty-steps">
+                        <div class="empty-step">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Add Content</span>
+                        </div>
+                        <div class="empty-step">
+                            <span class="step-number">2</span>
+                            <span class="step-text">Customize</span>
+                        </div>
+                        <div class="empty-step">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Download</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast toast-success">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message">PDF generated successfully!</span>
+    </div>
+
+    <script src="/js/pdf-engine.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
