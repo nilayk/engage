@@ -3,10 +3,7 @@
 
 services:
   engage:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: engage:latest
+    image: ghcr.io/nilayk/engage:latest
     container_name: engage
     ports:
       - "3000:3000"
