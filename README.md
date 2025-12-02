@@ -3,6 +3,7 @@
 A beautiful, lightweight web application that converts URLs and raw HTML to customizable, publication-quality PDFs with client-side generation and optional AI-powered content cleanup.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build and Publish](https://github.com/nilayk/engage/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/nilayk/engage/actions/workflows/docker-publish.yml)
 
 > **Note**: This project was generated with the assistance of Claude (Anthropic), an AI language model. The code has been reviewed but may contain imperfections. Contributions and improvements are welcome!
 
