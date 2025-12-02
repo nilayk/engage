@@ -1,12 +1,13 @@
 # Engage - Lite Version (No AI)
 # Usage: docker compose -f docker-compose.lite.yml up -d
+# Configuration: Copy .env.example to .env and customize (optional)
 
 services:
   engage:
     image: ghcr.io/nilayk/engage:latest
     container_name: engage
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000

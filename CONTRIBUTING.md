@@ -33,6 +33,8 @@ Thank you for your interest in contributing to Engage! This document provides gu
 
 ### Development Setup
 
+#### Option 1: Local Node.js
+
 ```bash
 # Clone your fork
 git clone https://github.com/YOUR_USERNAME/engage.git
@@ -41,10 +43,41 @@ cd engage
 # Install dependencies
 npm install
 
+# (Optional) Create .env for custom configuration
+cp .env.example .env
+
 # Start development server
 npm start
 
 # Open http://localhost:3000
+```
+
+#### Option 2: Docker Development
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/engage.git
+cd engage
+
+# Build and run with local changes
+docker compose up -d --build
+
+# View logs
+docker compose logs -f engage
+
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+#### With Local Ollama (for AI features)
+
+```bash
+# Install Ollama from https://ollama.ai/
+ollama pull qwen2.5-coder:1.5b
+ollama pull nomic-embed-text
+
+# Start Engage (connects to localhost:11434 automatically)
+npm start
 ```
 
 ### Code Style
@@ -58,16 +91,33 @@ npm start
 
 ```
 engage/
-├── server.js           # Express server
+├── server.js              # Express server
 ├── public/
-│   ├── index.html      # Main HTML
-│   ├── css/styles.css  # Styling
+│   ├── index.html         # Main HTML
+│   ├── css/styles.css     # Styling
 │   └── js/
-│       ├── app.js      # Main application logic
-│       └── pdf-engine.js # PDF generation
-├── Dockerfile          # Docker configuration
-└── docker-compose.yml  # Docker Compose setup
+│       ├── app.js         # Main application logic
+│       └── pdf-engine.js  # PDF generation
+├── Dockerfile             # Docker configuration
+├── docker-compose.yml     # Full setup (with AI)
+├── docker-compose.lite.yml # Lite setup (no AI)
+├── .env.example           # Environment configuration template
+└── .github/
+    └── workflows/
+        └── docker-publish.yml # CI/CD pipeline
 ```
+
+## CI/CD Pipeline
+
+When you push to `main` or create a version tag, GitHub Actions automatically:
+
+1. Builds the Docker image
+2. Pushes to GitHub Container Registry (`ghcr.io/nilayk/engage`)
+3. Tags with `latest`, commit SHA, and version (if tagged)
+
+**Testing your changes:**
+- PRs don't trigger image publishing
+- Test locally with `docker compose up -d --build` before submitting
 
 ## Areas for Contribution
 

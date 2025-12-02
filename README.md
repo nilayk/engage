@@ -63,11 +63,15 @@ docker compose version
 Includes Ollama for AI-powered content extraction and cleanup.
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd engage
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.yml
 
-# Build and start all services
+# (Optional) Create .env file to customize models
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/.env.example
+cp .env.example .env
+# Edit .env to change models if desired
+
+# Start all services
 docker compose up -d
 
 # Wait for models to download (first run only)
@@ -88,11 +92,10 @@ docker compose logs -f ollama-setup
 Lightweight version without AI features (~100MB).
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd engage
+# Download docker-compose.lite.yml
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.lite.yml
 
-# Build and start
+# Start
 docker compose -f docker-compose.lite.yml up -d
 
 # Open http://localhost:3000
@@ -166,7 +169,7 @@ docker run -d -p 3000:3000 \
 
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone https://github.com/nilayk/engage.git
 cd engage
 
 # Install dependencies
@@ -192,6 +195,27 @@ npm start
 ---
 
 ## Configuration
+
+### Using .env File (Recommended for Docker)
+
+Create a `.env` file in the same directory as your `docker-compose.yml`:
+
+```bash
+# Download the example configuration
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/.env.example
+cp .env.example .env
+
+# Edit .env to customize
+```
+
+Example `.env` file:
+```env
+PORT=3000
+OLLAMA_MODEL=qwen2.5-coder:1.5b
+EMBEDDING_MODEL=nomic-embed-text
+```
+
+The models specified in `.env` are automatically downloaded when you run `docker compose up -d`.
 
 ### Environment Variables
 
@@ -308,7 +332,7 @@ This project was created with assistance from **Claude** (Anthropic), a large la
 
 ## License
 
-[MIT License](LICENSE) - Copyright (c) 2024 Engage Contributors
+[MIT License](LICENSE) - Copyright (c) 2025 Engage Contributors
 
 ---
 
