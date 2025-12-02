@@ -45,210 +45,148 @@ Integrated [Ollama](https://ollama.ai/) for intelligent content processing:
 
 ---
 
-## Docker Setup (Recommended)
+## Quick Start with Docker
 
 ### Prerequisites
 
-1. **Install Docker Desktop**
-   - Windows: [Download Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/)
-   - macOS: [Download Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/)
-   - Linux: [Install Docker Engine](https://docs.docker.com/engine/install/)
+Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose V2).
 
-2. **Verify Installation**
-   ```bash
-   docker --version
-   docker-compose --version
-   ```
+Verify installation:
+```bash
+docker --version
+docker compose version
+```
 
 ### Option 1: Full Setup (with AI)
 
-This setup includes Ollama for AI-powered content cleanup. Requires ~4GB RAM and ~2GB disk space.
+Includes Ollama for AI-powered content extraction and cleanup.
 
 ```bash
-# 1. Clone or download the repository
+# Clone the repository
 git clone <repository-url>
 cd engage
 
-# 2. Build and start all services
-docker-compose up -d
+# Build and start all services
+docker compose up -d
 
-# 3. Wait for the model to download (first run only, ~2GB)
-#    Monitor progress:
-docker logs engage-ollama-pull -f
+# Wait for models to download (first run only)
+docker compose logs -f ollama-setup
 
-# 4. Check all services are running
-docker-compose ps
-
-# 5. Open in browser
-#    http://localhost:3000
+# Open http://localhost:3000
 ```
 
-**What gets started:**
+**Services started:**
 | Container | Description | Port |
 |-----------|-------------|------|
-| `engage` | Main web application | 3000 |
+| `engage` | Web application | 3000 |
 | `engage-ollama` | Ollama AI server | 11434 |
-| `engage-ollama-pull` | Downloads AI model (exits after completion) | - |
+| `engage-ollama-setup` | Downloads AI models (exits after) | - |
 
 ### Option 2: Lite Setup (no AI)
 
-Lightweight setup without AI features. Requires only ~256MB RAM.
+Lightweight version without AI features (~100MB).
 
 ```bash
-# 1. Clone or download the repository
+# Clone the repository
 git clone <repository-url>
 cd engage
 
-# 2. Build and start (lite version)
-docker-compose -f docker-compose.lite.yml up -d
+# Build and start
+docker compose -f docker-compose.lite.yml up -d
 
-# 3. Check service is running
-docker-compose -f docker-compose.lite.yml ps
-
-# 4. Open in browser
-#    http://localhost:3000
-```
-
-### Managing the Services
-
-```bash
-# View running containers
-docker-compose ps
-
-# View logs
-docker-compose logs -f           # All services
-docker-compose logs -f engage    # Just the web app
-docker-compose logs -f ollama    # Just Ollama
-
-# Stop services (keeps data)
-docker-compose stop
-
-# Start services again
-docker-compose start
-
-# Stop and remove containers
-docker-compose down
-
-# Stop and remove everything including AI model data
-docker-compose down -v
-
-# Rebuild after code changes
-docker-compose up -d --build
-```
-
-### Updating
-
-```bash
-# Pull latest changes
-git pull
-
-# Rebuild and restart
-docker-compose up -d --build
-```
-
-### Changing the AI Model
-
-The default model is `qwen2.5-coder:1.5b`, optimized for HTML/code processing. Alternatives:
-
-| Model | Size | RAM | Best For |
-|-------|------|-----|----------|
-| `qwen2.5-coder:1.5b` | ~1GB | 4GB | Default - fast, efficient |
-| `qwen2.5-coder:3b` | ~2GB | 6GB | Better quality |
-| `phi3:mini` | ~2GB | 6GB | Good instruction following |
-| `llama3.2:3b` | ~2GB | 6GB | General purpose |
-
-To change, edit `docker-compose.yml`:
-
-```yaml
-environment:
-  - OLLAMA_MODEL=qwen2.5-coder:3b    # Your preferred model
-```
-
-Update the pull command in the `ollama-pull` service to match, then restart:
-```bash
-docker-compose down
-docker-compose up -d
+# Open http://localhost:3000
 ```
 
 ---
 
-## Local Development (without Docker)
+## Docker Commands
+
+```bash
+# Start services
+docker compose up -d
+
+# View status
+docker compose ps
+
+# View logs
+docker compose logs -f              # All services
+docker compose logs -f engage       # Just web app
+docker compose logs -f ollama       # Just Ollama
+
+# Stop services (keeps data)
+docker compose stop
+
+# Start again
+docker compose start
+
+# Stop and remove containers
+docker compose down
+
+# Stop and remove everything (including AI models)
+docker compose down -v
+
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+### Lite version commands
+```bash
+docker compose -f docker-compose.lite.yml up -d
+docker compose -f docker-compose.lite.yml down
+```
+
+---
+
+## Building a Standalone Image
+
+Build a self-contained image that can be deployed anywhere:
+
+```bash
+# Build the image
+docker build -t engage:latest .
+
+# Run standalone (no AI)
+docker run -d -p 3000:3000 --name engage engage:latest
+
+# Run with external Ollama
+docker run -d -p 3000:3000 \
+  -e OLLAMA_HOST=http://your-ollama-server:11434 \
+  --name engage engage:latest
+```
+
+---
+
+## Local Development
 
 ### Prerequisites
 - Node.js 18+ ([Download](https://nodejs.org/))
-- npm (comes with Node.js)
 
 ### Setup
 
 ```bash
-# 1. Clone repository
+# Clone repository
 git clone <repository-url>
 cd engage
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Start development server
+# Start server
 npm start
 
-# 4. Open http://localhost:3000
+# Open http://localhost:3000
 ```
 
-### With Local Ollama (optional)
+### With Local Ollama
 
 ```bash
-# 1. Install Ollama from https://ollama.ai/
-
-# 2. Pull the recommended model (optimized for HTML/code)
+# Install Ollama from https://ollama.ai/
 ollama pull qwen2.5-coder:1.5b
+ollama pull nomic-embed-text
 
-# 3. Start Ollama (runs on port 11434)
-ollama serve
-
-# 4. In another terminal, start Engage
+# Start Engage (connects to localhost:11434 automatically)
 npm start
-
-# AI cleanup will automatically connect to localhost:11434
 ```
-
----
-
-## Docker Architecture
-
-```
-┌─────────────────────────────────────────────────┐
-│                  Docker Network                  │
-│  ┌─────────────┐          ┌─────────────────┐   │
-│  │   Engage    │◄────────►│     Ollama      │   │
-│  │  :3000      │   HTTP   │    :11434       │   │
-│  │  (Node.js)  │          │  (llama3.2)     │   │
-│  └─────────────┘          └─────────────────┘   │
-│         │                         │             │
-│         │                  ┌──────┴──────┐      │
-│         │                  │ ollama_data │      │
-│         │                  │  (volume)   │      │
-└─────────┼──────────────────┴─────────────┴──────┘
-          │                         
-     Port 3000                 
-     (Web UI)               
-```
-
----
-
-## Usage Guide
-
-1. **Enter Content**: Paste a URL or raw HTML
-2. **Customize**: Adjust PDF settings and enable Book Mode if desired
-3. **Generate**: Click "Generate PDF" or "Print to PDF"
-
-### Tips for Best Results
-
-| Scenario | Recommendation |
-|----------|----------------|
-| Long documents (20+ pages) | Use "Print to PDF" button |
-| Articles, guides, docs | Enable Book Mode |
-| E-readers, smartphones | Increase Font Scale, use Kindle/Smartphone size |
-| Messy web pages | Enable "Strip Navigation" + "AI Cleanup" |
 
 ---
 
@@ -265,141 +203,117 @@ npm start
 
 ### Custom Port
 
-**Docker:**
-```yaml
-# In docker-compose.yml
-ports:
-  - "8080:3000"  # Access on port 8080
+```bash
+# Docker
+docker run -d -p 8080:3000 engage:latest
+
+# Local
+PORT=8080 npm start
 ```
 
-**Local:**
-```bash
-PORT=8080 npm start
+### AI Model Alternatives
+
+| Model | Size | RAM | Best For |
+|-------|------|-----|----------|
+| `qwen2.5-coder:1.5b` | ~1GB | 4GB | Default - fast, efficient |
+| `qwen2.5-coder:3b` | ~2GB | 6GB | Better quality |
+| `phi3:mini` | ~2GB | 6GB | Good instruction following |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│              Docker Compose Network              │
+│                                                  │
+│  ┌──────────────┐       ┌──────────────────┐    │
+│  │    Engage    │◄─────►│     Ollama       │    │
+│  │   (Node.js)  │ HTTP  │  qwen2.5-coder   │    │
+│  │    :3000     │       │  nomic-embed     │    │
+│  └──────────────┘       └──────────────────┘    │
+│         │                       │               │
+└─────────┼───────────────────────┼───────────────┘
+          │                       │
+     Port 3000              Port 11434
+     (Web UI)            (Ollama API)
 ```
 
 ---
 
-## Troubleshooting
+## Usage Tips
 
-### Docker Issues
-
-**"Cannot connect to Docker daemon"**
-- Ensure Docker Desktop is running
-- On Linux, ensure your user is in the `docker` group
-
-**"Port 3000 already in use"**
-```bash
-# Find what's using the port
-# Windows:
-netstat -ano | findstr :3000
-# Linux/Mac:
-lsof -i :3000
-
-# Or change the port in docker-compose.yml
-```
-
-**"AI cleanup not working"**
-```bash
-# Check if Ollama is running
-docker logs engage-ollama
-
-# Check if model was downloaded
-docker logs engage-ollama-pull
-
-# Verify Ollama is accessible
-curl http://localhost:11434/api/tags
-```
-
-**"Out of memory"**
-- Increase Docker Desktop memory limit (Settings > Resources)
-- Or use the lite version without Ollama
-
-### PDF Issues
-
-**"PDF is only 1-2 pages"**
-- Use "Print to PDF" button for long documents
-- This uses the browser's native PDF generation which handles long content better
-
-**"Formatting looks wrong"**
-- Enable "Strip Navigation" to remove page chrome
-- Try enabling "Book Mode" for cleaner output
-- Adjust font scale if text is too small/large
+| Scenario | Recommendation |
+|----------|----------------|
+| Long documents (20+ pages) | Use "Print to PDF" button |
+| Articles, guides, docs | Enable Book Mode |
+| E-readers, phones | Use Kindle/Smartphone size, increase font |
+| Messy web pages | Enable Smart Extraction + AI Cleanup |
 
 ---
 
 ## System Requirements
 
-### Lite Version (no AI)
-- Docker: ~100MB image
-- Memory: 256MB RAM
-- Storage: 100MB
+### Lite Version
+- RAM: 256MB
+- Storage: ~100MB
 
 ### Full Version (with AI)
-- Docker: ~100MB (Engage) + ~2.5GB (Ollama + models)
-- Memory: 4GB RAM recommended
-- Storage: ~2.5GB for model data (qwen2.5-coder + nomic-embed-text)
+- RAM: 4GB recommended
+- Storage: ~2.5GB (models)
 
 ---
 
-## Technology Stack
+## Troubleshooting
 
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Backend**: Node.js with Express
-- **PDF Generation**: html2pdf.js (client-side)
-- **Syntax Highlighting**: highlight.js
-- **HTML Sanitization**: DOMPurify
-- **AI Integration**: Ollama with qwen2.5-coder
+### "Cannot connect to Docker daemon"
+- Ensure Docker Desktop is running
+
+### "Port 3000 already in use"
+```bash
+# Find what's using it
+# Windows: netstat -ano | findstr :3000
+# Linux/Mac: lsof -i :3000
+
+# Or use a different port
+docker compose up -d -e PORT=8080
+```
+
+### "AI features not working"
+```bash
+# Check Ollama is running
+docker compose logs ollama
+
+# Check models were downloaded
+docker compose logs ollama-setup
+
+# Verify API is accessible
+curl http://localhost:11434/api/tags
+```
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Ways to Contribute
-- Report bugs and issues
-- Suggest new features
-- Submit pull requests
-- Improve documentation
-- Add translations
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
 ## Disclaimer
 
-This project was created with the assistance of **Claude** (Anthropic), a large language model (LLM). While the code has been tested and reviewed, it may contain:
-
-- Imperfections or bugs
-- Suboptimal implementations
-- Security considerations that need review for production use
-
-**Use at your own discretion.** The maintainers make no warranties about the suitability of this software for any particular purpose. Always review code before deploying to production environments.
-
-If you find issues, please report them or submit a pull request!
+This project was created with assistance from **Claude** (Anthropic), a large language model. While tested and reviewed, it may contain imperfections. Use at your own discretion and review code before production deployment.
 
 ---
 
 ## License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License - Copyright (c) 2024 Engage Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software...
-```
+[MIT License](LICENSE) - Copyright (c) 2024 Engage Contributors
 
 ---
 
 ## Acknowledgments
 
-- [html2pdf.js](https://github.com/eKoopmans/html2pdf.js) - Client-side PDF generation
+- [html2pdf.js](https://github.com/eKoopmans/html2pdf.js) - PDF generation
+- [Ollama](https://ollama.ai/) - Local AI
 - [highlight.js](https://highlightjs.org/) - Syntax highlighting
 - [DOMPurify](https://github.com/cure53/DOMPurify) - HTML sanitization
-- [Ollama](https://ollama.ai/) - Local LLM integration
-- [Express](https://expressjs.com/) - Web framework
-- [Claude](https://www.anthropic.com/claude) - AI assistant used in development

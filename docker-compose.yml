@@ -1,20 +1,27 @@
-version: '3.8'
+# Engage - Full Stack with AI
+# Usage: docker compose up -d
 
 services:
   engage:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: engage:latest
     container_name: engage
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
       - NODE_ENV=production
+      - PORT=3000
       - OLLAMA_HOST=http://ollama:11434
       - OLLAMA_MODEL=qwen2.5-coder:1.5b
+      - EMBEDDING_MODEL=nomic-embed-text
     depends_on:
       ollama:
         condition: service_started
     restart: unless-stopped
+    networks:
+      - engage-network
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
@@ -30,34 +37,44 @@ services:
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
+    networks:
+      - engage-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
 
-  # One-time model pull service
-  ollama-pull:
+  # One-time model pull service (runs once then exits)
+  ollama-setup:
     image: ollama/ollama:latest
-    container_name: engage-ollama-pull
+    container_name: engage-ollama-setup
     depends_on:
-      - ollama
+      ollama:
+        condition: service_started
     volumes:
       - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    networks:
+      - engage-network
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         echo "Waiting for Ollama to be ready..."
         sleep 10
-        echo "Pulling qwen2.5-coder:1.5b model (optimized for HTML/code cleanup)..."
+        echo "Pulling qwen2.5-coder:1.5b (for AI cleanup)..."
         ollama pull qwen2.5-coder:1.5b
-        echo "Pulling nomic-embed-text model (for smart content extraction)..."
+        echo "Pulling nomic-embed-text (for smart extraction)..."
         ollama pull nomic-embed-text
         echo "All models ready!"
-    environment:
-      - OLLAMA_HOST=http://ollama:11434
     restart: "no"
+
+networks:
+  engage-network:
+    name: engage-network
+    driver: bridge
 
 volumes:
   ollama_data:

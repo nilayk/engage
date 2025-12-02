@@ -1,17 +1,18 @@
-version: '3.8'
-
-# Lite version - Engage only, without Ollama AI
-# Use this if you don't need AI cleanup features
+# Engage - Lite Version (No AI)
+# Usage: docker compose -f docker-compose.lite.yml up -d
 
 services:
   engage:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: engage:lite
     container_name: engage
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
       - NODE_ENV=production
+      - PORT=3000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
@@ -19,4 +20,3 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
-
