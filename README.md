@@ -76,22 +76,58 @@ docker compose version
 Includes Ollama for AI-powered content extraction and cleanup.
 
 ```bash
-# Download docker-compose.yml
+# Download files
 curl -O https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.gpu.yml
+curl -O https://raw.githubusercontent.com/nilayk/engage/main/start.sh
+chmod +x start.sh
 
-# (Optional) Create .env file to customize models
+# (Optional) Create .env file to customize settings
 curl -O https://raw.githubusercontent.com/nilayk/engage/main/.env.example
 cp .env.example .env
-# Edit .env to change models if desired
 
-# Start all services
-docker compose up -d
+# Start with auto GPU detection
+./start.sh
 
 # Wait for models to download (first run only)
-docker compose logs -f ollama-setup
+./start.sh logs
 
 # Open http://localhost:3000
 ```
+
+The startup script automatically detects NVIDIA GPUs and enables acceleration if available.
+
+#### Windows (PowerShell)
+
+```powershell
+# Download files
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.yml" -OutFile "docker-compose.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nilayk/engage/main/docker-compose.gpu.yml" -OutFile "docker-compose.gpu.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nilayk/engage/main/start.ps1" -OutFile "start.ps1"
+
+# Start with auto GPU detection
+.\start.ps1
+
+# Open http://localhost:3000
+```
+
+#### Manual GPU Control
+
+If you prefer manual control over GPU usage:
+
+```bash
+# CPU only
+docker compose up -d
+
+# With GPU (manual)
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+```
+
+**Prerequisites for GPU support:**
+- NVIDIA GPU with compute capability 5.0+
+- NVIDIA drivers installed (`nvidia-smi` should work)
+- **Linux**: [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed
+- **Windows**: Docker Desktop with WSL2 backend + [NVIDIA GPU drivers for WSL](https://developer.nvidia.com/cuda/wsl)
 
 **Services started:**
 | Container | Description | Port |
@@ -118,9 +154,36 @@ docker compose -f docker-compose.lite.yml up -d
 
 ## Docker Commands
 
+### Using Startup Scripts (Recommended)
+
+The startup scripts auto-detect NVIDIA GPUs and enable acceleration automatically.
+
+**Linux/macOS:**
 ```bash
-# Start services
+./start.sh              # Start (auto GPU detection)
+./start.sh down         # Stop
+./start.sh logs         # View logs
+./start.sh status       # Check status
+./start.sh restart      # Restart
+```
+
+**Windows PowerShell:**
+```powershell
+.\start.ps1             # Start (auto GPU detection)
+.\start.ps1 down        # Stop
+.\start.ps1 logs        # View logs
+.\start.ps1 status      # Check status
+.\start.ps1 restart     # Restart
+```
+
+### Using Docker Compose Directly
+
+```bash
+# Start services (CPU only)
 docker compose up -d
+
+# Start with GPU
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
 
 # View status
 docker compose ps
@@ -223,9 +286,15 @@ cp .env.example .env
 
 Example `.env` file:
 ```env
+# Server
 PORT=3000
+
+# AI Models
 OLLAMA_MODEL=qwen2.5-coder:1.5b
 EMBEDDING_MODEL=nomic-embed-text
+
+# Timeouts (increase for slower hardware)
+OLLAMA_GENERATE_TIMEOUT=180000
 ```
 
 The models specified in `.env` are automatically downloaded when you run `docker compose up -d`.
@@ -238,6 +307,7 @@ The models specified in `.env` are automatically downloaded when you run `docker
 | `OLLAMA_HOST` | http://localhost:11434 | Ollama API endpoint |
 | `OLLAMA_MODEL` | qwen2.5-coder:1.5b | LLM for AI cleanup |
 | `EMBEDDING_MODEL` | nomic-embed-text | Model for smart extraction |
+| `OLLAMA_GENERATE_TIMEOUT` | 180000 | AI generation timeout in ms (3 min default) |
 
 ### Custom Port
 
@@ -292,12 +362,18 @@ PORT=8080 npm start
 
 ## System Requirements
 
-### Lite Version
+### Lite Version (no AI)
 - RAM: 256MB
 - Storage: ~100MB
 
-### Full Version (with AI)
-- RAM: 4GB recommended
+### Full Version (with AI - CPU)
+- RAM: 4GB recommended (8GB for larger models)
+- Storage: ~2.5GB (models)
+
+### Full Version (with AI - GPU)
+- NVIDIA GPU with 4GB+ VRAM
+- NVIDIA drivers + container toolkit
+- RAM: 4GB system RAM
 - Storage: ~2.5GB (models)
 
 ---
@@ -328,6 +404,51 @@ docker compose logs ollama-setup
 # Verify API is accessible
 curl http://localhost:11434/api/tags
 ```
+
+### "Ollama cleanup error: Request timeout"
+
+The AI model is taking too long to process content. This often happens on:
+- First request (model cold-start/loading into memory)
+- Large pages with lots of content
+- Systems with limited CPU/RAM
+
+**Solution**: Increase the timeout in your `.env` file:
+```env
+# Increase to 5 minutes (300000ms) or more
+OLLAMA_GENERATE_TIMEOUT=300000
+```
+
+Then restart:
+```bash
+docker compose down
+docker compose up -d
+```
+
+### "GPU not being used by Ollama"
+
+Ensure you're using the GPU compose file:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+```
+
+Verify GPU is accessible:
+```bash
+# Check NVIDIA drivers on host
+nvidia-smi
+
+# Check GPU is visible in container
+docker exec engage-ollama nvidia-smi
+```
+
+**Linux**: Install [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html):
+```bash
+# Ubuntu/Debian
+sudo apt-get install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+**Windows**: Ensure Docker Desktop is using WSL2 backend and you have [NVIDIA GPU drivers for WSL](https://developer.nvidia.com/cuda/wsl) installed.
 
 ---
 

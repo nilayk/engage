@@ -14,9 +14,9 @@ module.exports = {
     // qwen2.5-coder is optimized for code/HTML processing - lightweight and fast
     model: process.env.OLLAMA_MODEL || 'qwen2.5-coder:1.5b',
     embeddingModel: process.env.EMBEDDING_MODEL || 'nomic-embed-text',
-    // Timeouts
+    // Timeouts (generate timeout is longer to handle model cold-starts and large content)
     statusTimeout: 3000,
-    generateTimeout: 60000,
+    generateTimeout: parseInt(process.env.OLLAMA_GENERATE_TIMEOUT, 10) || 180000,
     embeddingTimeout: 30000,
   },
 

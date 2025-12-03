@@ -1,0 +1,21 @@
+# Engage - NVIDIA GPU Support Override
+# Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+#
+# Prerequisites:
+#   - NVIDIA GPU with compute capability 5.0+
+#   - NVIDIA drivers installed on host
+#   - Linux: nvidia-container-toolkit installed
+#   - Windows: Docker Desktop with WSL2 backend + NVIDIA GPU drivers for WSL
+#
+# Verify GPU is available: nvidia-smi
+
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
