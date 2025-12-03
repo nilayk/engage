@@ -77,7 +77,8 @@ Cleaned HTML:`;
       stream: false,
       options: {
         temperature: 0.1,
-        num_predict: 16000,
+        num_ctx: config.ollama.contextSize,    // Context window for input
+        num_predict: config.ollama.contextSize, // Max tokens to generate
       },
     }, { timeout: config.ollama.generateTimeout });
 

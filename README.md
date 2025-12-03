@@ -307,6 +307,7 @@ The models specified in `.env` are automatically downloaded when you run `docker
 | `OLLAMA_HOST` | http://localhost:11434 | Ollama API endpoint |
 | `OLLAMA_MODEL` | qwen2.5-coder:1.5b | LLM for AI cleanup |
 | `EMBEDDING_MODEL` | nomic-embed-text | Model for smart extraction |
+| `OLLAMA_CONTEXT_SIZE` | 16384 | Context window in tokens (increase for longer pages) |
 | `OLLAMA_GENERATE_TIMEOUT` | 180000 | AI generation timeout in ms (3 min default) |
 
 ### Custom Port
@@ -423,6 +424,23 @@ Then restart:
 docker compose down
 docker compose up -d
 ```
+
+### "truncating input prompt" warning / Content getting cut off
+
+If you see this in logs:
+```
+level=WARN msg="truncating input prompt" limit=4096 prompt=8822
+```
+
+The model's context window is too small for the page content.
+
+**Solution**: Increase the context size in your `.env` file:
+```env
+# Increase context window (requires more VRAM/RAM)
+OLLAMA_CONTEXT_SIZE=32768
+```
+
+Note: Larger context sizes require more memory. With GPU: ~1GB extra VRAM per 8k tokens. With CPU: ~2GB extra RAM per 8k tokens.
 
 ### "GPU not being used by Ollama"
 
