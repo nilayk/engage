@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/images/logo.svg" alt="Engage Logo" width="300">
+  <img src="docs/images/logo.svg" alt="Engage Logo" width="400">
   <h1>Engage - URL to PDF Converter</h1>
   <p>A beautiful, lightweight web application that converts URLs and raw HTML to customizable, publication-quality PDFs with client-side generation and optional AI-powered content cleanup.</p>
 </div>
