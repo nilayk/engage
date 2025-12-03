@@ -39,6 +39,9 @@ services:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
+    environment:
+      # Set default context length for all models (can be overridden per-request)
+      - OLLAMA_CONTEXT_LENGTH=${OLLAMA_CONTEXT_SIZE:-16384}
     restart: unless-stopped
     networks:
       - engage-network
